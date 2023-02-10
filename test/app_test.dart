@@ -1,11 +1,11 @@
 /*
 @Tags(const ['aot'])
 @TestOn('browser')
+
 import 'dart:async';
 
-
-import 'package:angular2/angular2.dart';
-import 'package:angular_test/angular_test.dart';
+import 'package:ngdart2/angular2.dart';
+import 'package:ngtest/angular_test.dart';
 import 'package:pageloader/objects.dart';
 import 'package:test/test.dart';
 
