@@ -4,10 +4,10 @@ version: 1.0.0
 homepage: https://github.com/adamlofts/angular_quill
 
 environment:
-  sdk: '>=2.11.99 <3.0.0'
+  sdk: '2.19.6'
 
 dependencies:
-  ngdart: ^7.0.0
-  ngforms: ^4.0.0
+  ngdart: ^8.0.0-dev.2
+  ngforms: ^5.0.0-dev.1
   js: ^0.6.0
 
