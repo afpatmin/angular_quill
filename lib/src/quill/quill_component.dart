@@ -9,15 +9,15 @@ import 'package:ngforms/angular_forms.dart';
 import 'quill.dart' as quill;
 
 @Directive(selector: 'quill[ngModel]', providers: const [
-  const ExistingProvider.forToken(ngValueAccessor,  QuillValueAccessor)
+  const ExistingProvider.forToken(ngValueAccessor, QuillValueAccessor)
 ])
 class QuillValueAccessor implements ControlValueAccessor<String>, OnDestroy {
   final QuillComponent _quill;
-  StreamSubscription _blurSub;
-  StreamSubscription _inputSub;
+  late StreamSubscription _blurSub;
+  late StreamSubscription _inputSub;
 
   TouchFunction onTouched = () {};
-  ChangeFunction<String> onChange = (String _, {String rawValue}) {};
+  ChangeFunction<String> onChange = (String _, {String? rawValue}) {};
 
   QuillValueAccessor(this._quill) {
     _inputSub = _quill.input.listen(_onInput);
@@ -67,27 +67,28 @@ class QuillValueAccessor implements ControlValueAccessor<String>, OnDestroy {
   templateUrl: 'quill_component.html',
 )
 class QuillComponent implements AfterContentInit, OnDestroy {
-  quill.QuillStatic quillEditor;
+  quill.QuillStatic? quillEditor;
 
   @ViewChild('editor')
-  Element editor;
+  Element? editor;
 
   String _initialValue = '';
   String get value {
-    if (editor.children.isEmpty) {
+    if (editor == null || editor!.children.isEmpty) {
       return '';
+    } else {
+      return editor!.children.first.innerHtml ?? '';
     }
-    return editor.children.first.innerHtml;
   }
 
   @Input()
   set value(String val) {
-    String v = val ?? '';
+    String v = val;
     if (quillEditor == null) {
       _initialValue = val;
-      return;
+    } else {
+      quillEditor!.pasteHTML(v);
     }
-    quillEditor.pasteHTML(v);
   }
 
   @Input()
@@ -101,10 +102,7 @@ class QuillComponent implements AfterContentInit, OnDestroy {
   @Input()
   set disabled(bool v) {
     _disabled = v;
-    // The editor may not have been created yet
-    if (quillEditor != null) {
-      quillEditor.enable(!v);
-    }
+    quillEditor?.enable(!v);
   }
 
   final StreamController _blur = new StreamController.broadcast();
@@ -124,27 +122,24 @@ class QuillComponent implements AfterContentInit, OnDestroy {
 
   @override
   ngAfterContentInit() {
-    quillEditor = new quill.QuillStatic(editor,
-      new quill.QuillOptionsStatic(
-        theme: 'snow',
-        placeholder: placeholder,
-        modules: jsify(modules)
-      )
-    );
+    quillEditor = new quill.QuillStatic(
+        editor,
+        new quill.QuillOptionsStatic(
+            theme: 'snow', placeholder: placeholder, modules: jsify(modules)));
 
     _textChangeSub = allowInterop(_onTextChange);
     _selectionChangeSub = allowInterop(_onSelectionChange);
-    quillEditor.on('text-change', _textChangeSub);
-    quillEditor.on('selection-change', _selectionChangeSub);
+    quillEditor!.on('text-change', _textChangeSub);
+    quillEditor!.on('selection-change', _selectionChangeSub);
 
-    quillEditor.enable(!_disabled);
-    quillEditor.pasteHTML(_initialValue);
+    quillEditor!.enable(!_disabled);
+    quillEditor!.pasteHTML(_initialValue);
   }
 
   @override
   ngOnDestroy() {
-    quillEditor.off('text-change', _textChangeSub);
-    quillEditor.off('selection-change', _selectionChangeSub);
+    quillEditor?.off('text-change', _textChangeSub);
+    quillEditor?.off('selection-change', _selectionChangeSub);
 
     // quill docs say no explicit destroy call is required.
   }
