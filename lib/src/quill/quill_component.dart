@@ -8,60 +8,6 @@ import 'package:ngforms/angular_forms.dart';
 
 import 'quill.dart' as quill;
 
-@Directive(selector: 'quill[ngModel]', providers: const [
-  const ExistingProvider.forToken(ngValueAccessor, QuillValueAccessor)
-])
-class QuillValueAccessor implements ControlValueAccessor<String>, OnDestroy {
-  final QuillComponent _quill;
-  late StreamSubscription _blurSub;
-  late StreamSubscription _inputSub;
-
-  TouchFunction onTouched = () {};
-  ChangeFunction<String> onChange = (String _, {String? rawValue}) {};
-
-  QuillValueAccessor(this._quill) {
-    _inputSub = _quill.input.listen(_onInput);
-    _blurSub = _quill.blur.listen(_onBlur);
-  }
-
-  @override
-  ngOnDestroy() {
-    _blurSub.cancel();
-    _inputSub.cancel();
-  }
-
-  /// Write a new value to the element.
-  @override
-  void writeValue(String obj) {
-    _quill.value = obj;
-  }
-
-  void _onBlur(_) {
-    onTouched();
-  }
-
-  void _onInput(_) {
-    onChange(_quill.value);
-  }
-
-  /// Set the function to be called when the control receives a change event.
-  @override
-  void registerOnChange(ChangeFunction<String> fn) {
-    this.onChange = fn;
-  }
-
-  /// Set the function to be called when the control receives a touch event.
-  @override
-  void registerOnTouched(TouchFunction fn) {
-    onTouched = fn;
-  }
-
-  @override
-  void onDisabledChanged(bool isDisabled) {
-    _quill.disabled = isDisabled;
-  }
-}
-
 @Component(
   selector: 'quill',
   templateUrl: 'quill_component.html',
@@ -73,6 +19,40 @@ class QuillComponent implements AfterContentInit, OnDestroy {
   Element? editor;
 
   String _initialValue = '';
+  @Input()
+  String placeholder = '';
+
+  @Input()
+  dynamic modules = {};
+
+  bool _disabled = false;
+
+  final StreamController _blur = new StreamController.broadcast();
+
+  @Input()
+  int? maxLength;
+  final StreamController _focus = new StreamController();
+  final StreamController _input = new StreamController.broadcast();
+
+  var _selectionChangeSub;
+
+  var _textChangeSub;
+
+  @Output()
+  Stream get blur => _blur.stream;
+
+  bool get disabled => _disabled;
+  @Input()
+  set disabled(bool v) {
+    _disabled = v;
+    quillEditor?.enable(!v);
+  }
+
+  @Output()
+  Stream get focus => _focus.stream;
+  @Output()
+  Stream get input => _input.stream;
+
   String get value {
     if (editor == null || editor!.children.isEmpty) {
       return '';
@@ -90,35 +70,6 @@ class QuillComponent implements AfterContentInit, OnDestroy {
       quillEditor!.pasteHTML(v);
     }
   }
-
-  @Input()
-  String placeholder = '';
-
-  @Input()
-  dynamic modules = {};
-
-  bool _disabled = false;
-  bool get disabled => _disabled;
-  @Input()
-  set disabled(bool v) {
-    _disabled = v;
-    quillEditor?.enable(!v);
-  }
-
-  final StreamController _blur = new StreamController.broadcast();
-  @Output()
-  Stream get blur => _blur.stream;
-
-  final StreamController _focus = new StreamController();
-  @Output()
-  Stream get focus => _focus.stream;
-
-  final StreamController _input = new StreamController.broadcast();
-  @Output()
-  Stream get input => _input.stream;
-
-  var _selectionChangeSub;
-  var _textChangeSub;
 
   @override
   ngAfterContentInit() {
@@ -162,5 +113,59 @@ class QuillComponent implements AfterContentInit, OnDestroy {
   /// before the change, along with the source of the change are provided. The source will be "user" if it originates from the users
   void _onTextChange(delta, oldDelta, source) {
     _input.add(value);
+  }
+}
+
+@Directive(selector: 'quill[ngModel]', providers: const [
+  const ExistingProvider.forToken(ngValueAccessor, QuillValueAccessor)
+])
+class QuillValueAccessor implements ControlValueAccessor<String>, OnDestroy {
+  final QuillComponent _quill;
+  late StreamSubscription _blurSub;
+  late StreamSubscription _inputSub;
+
+  TouchFunction onTouched = () {};
+  ChangeFunction<String> onChange = (String _, {String? rawValue}) {};
+
+  QuillValueAccessor(this._quill) {
+    _inputSub = _quill.input.listen(_onInput);
+    _blurSub = _quill.blur.listen(_onBlur);
+  }
+
+  @override
+  ngOnDestroy() {
+    _blurSub.cancel();
+    _inputSub.cancel();
+  }
+
+  @override
+  void onDisabledChanged(bool isDisabled) {
+    _quill.disabled = isDisabled;
+  }
+
+  /// Set the function to be called when the control receives a change event.
+  @override
+  void registerOnChange(ChangeFunction<String> fn) {
+    this.onChange = fn;
+  }
+
+  /// Set the function to be called when the control receives a touch event.
+  @override
+  void registerOnTouched(TouchFunction fn) {
+    onTouched = fn;
+  }
+
+  /// Write a new value to the element.
+  @override
+  void writeValue(String obj) {
+    _quill.value = obj;
+  }
+
+  void _onBlur(_) {
+    onTouched();
+  }
+
+  void _onInput(_) {
+    onChange(_quill.value);
   }
 }
