@@ -22,12 +22,16 @@ abstract class QuillOptionsStatic {
   external set readOnly(bool v);
   external String get theme;
   external set theme(String v);
-  external factory QuillOptionsStatic(
-      {String debug,
-      dynamic /*JSMap of <String,dynamic>*/ modules,
-      String placeholder,
-      bool readOnly,
-      String theme});
+  external set /*JSList of <String>*/ formats(dynamic v);
+  external dynamic get formats;
+  external factory QuillOptionsStatic({
+    String debug,
+    dynamic /*JSMap of <String,dynamic>*/ modules,
+    dynamic /*JSList of <String>*/ formats,
+    String placeholder,
+    bool readOnly,
+    String theme,
+  });
 }
 
 @anonymous
@@ -145,8 +149,10 @@ abstract class QuillStatic {
   external void setSelection(dynamic /*num|RangeStatic*/ index_range,
       [dynamic /*num|'api'|'user'|'silent'*/ length_source,
       String /*'api'|'user'|'silent'*/ source]);
-  external QuillStatic on(String eventName,
-      dynamic /*VoidFunc3<T, T, String>|(name: string, ...args: any[]) => void*/ callback);
+  external QuillStatic on(
+      String eventName,
+      dynamic /*VoidFunc3<T, T, String>|(name: string, ...args: any[]) => void*/
+          callback);
   external QuillStatic once(
       String eventName, void callback(DeltaStatic delta, String source));
   external QuillStatic off(String eventName, dynamic callback);

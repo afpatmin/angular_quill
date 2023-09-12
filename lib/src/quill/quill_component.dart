@@ -25,12 +25,33 @@ class QuillComponent implements AfterContentInit, OnDestroy {
   @Input()
   dynamic modules = {};
 
+  @Input()
+  List<String> formats = [
+    'background',
+    'bold',
+    'color',
+    'font',
+    'code',
+    'italic',
+    'link',
+    'size',
+    'strike',
+    'script',
+    'underline',
+    'blockquote',
+    'header',
+    'indent',
+    'list',
+    'align',
+    'direction',
+    'code-block',
+    'formula',
+  ];
+
   bool _disabled = false;
 
   final StreamController _blur = new StreamController.broadcast();
 
-  @Input()
-  int? maxLength;
   final StreamController _focus = new StreamController();
   final StreamController _input = new StreamController.broadcast();
 
@@ -76,7 +97,11 @@ class QuillComponent implements AfterContentInit, OnDestroy {
     quillEditor = new quill.QuillStatic(
         editor,
         new quill.QuillOptionsStatic(
-            theme: 'snow', placeholder: placeholder, modules: jsify(modules)));
+          theme: 'snow',
+          placeholder: placeholder,
+          modules: jsify(modules),
+          formats: jsify(formats),
+        ));
 
     _textChangeSub = allowInterop(_onTextChange);
     _selectionChangeSub = allowInterop(_onSelectionChange);
