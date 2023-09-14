@@ -12,20 +12,19 @@ import 'quill.dart' as quill;
   selector: 'quill',
   templateUrl: 'quill_component.html',
 )
-class QuillComponent implements AfterContentInit, OnDestroy {
+class QuillComponent implements AfterViewInit, OnDestroy {
   quill.QuillStatic? quillEditor;
 
   @ViewChild('editor')
   Element? editor;
 
   String _initialValue = '';
+
   @Input()
   String placeholder = '';
 
-  @Input()
   dynamic modules = {};
 
-  @Input()
   List<String> formats = [
     'background',
     'bold',
@@ -45,7 +44,6 @@ class QuillComponent implements AfterContentInit, OnDestroy {
     'align',
     'direction',
     'code-block',
-    'formula',
   ];
 
   bool _disabled = false;
@@ -63,6 +61,7 @@ class QuillComponent implements AfterContentInit, OnDestroy {
   Stream get blur => _blur.stream;
 
   bool get disabled => _disabled;
+
   @Input()
   set disabled(bool v) {
     _disabled = v;
@@ -71,6 +70,7 @@ class QuillComponent implements AfterContentInit, OnDestroy {
 
   @Output()
   Stream get focus => _focus.stream;
+
   @Output()
   Stream get input => _input.stream;
 
@@ -88,12 +88,12 @@ class QuillComponent implements AfterContentInit, OnDestroy {
     if (quillEditor == null) {
       _initialValue = val;
     } else {
-      quillEditor!.pasteHTML(v);
+      quillEditor!.pasteHTML(v, v);
     }
   }
 
   @override
-  ngAfterContentInit() {
+  ngAfterViewInit() {
     quillEditor = new quill.QuillStatic(
         editor,
         new quill.QuillOptionsStatic(
@@ -109,7 +109,8 @@ class QuillComponent implements AfterContentInit, OnDestroy {
     quillEditor!.on('selection-change', _selectionChangeSub);
 
     quillEditor!.enable(!_disabled);
-    quillEditor!.pasteHTML(_initialValue);
+    quillEditor!
+        .pasteHTML(_initialValue.replaceAll('</p><p>', '<p><br /></p>'));
   }
 
   @override
@@ -190,7 +191,7 @@ class QuillValueAccessor implements ControlValueAccessor<String>, OnDestroy {
     onTouched();
   }
 
-  void _onInput(_) {
+  void _onInput(v) {
     onChange(_quill.value);
   }
 }
