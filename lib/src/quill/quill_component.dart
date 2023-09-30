@@ -109,8 +109,7 @@ class QuillComponent implements AfterViewInit, OnDestroy {
     quillEditor!.on('selection-change', _selectionChangeSub);
 
     quillEditor!.enable(!_disabled);
-    quillEditor!
-        .pasteHTML(_initialValue.replaceAll('</p><p>', '<p><br /></p>'));
+    quillEditor!.pasteHTML(_initialValue);
   }
 
   @override
